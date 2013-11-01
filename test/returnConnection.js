@@ -75,41 +75,54 @@ test['returnConnection() destroys socket if socket is in deadpool'] = function (
 };
 
 test['returnConnection() does not restore socket that emitted "end" event'] = function (test) {
-    test.expect(1);
+    test.expect(2);
     var client = new CallosumClient();
     var conn1 = new net.Socket();
     conn1.id = 1;
+    var conn2 = new net.Socket();
+    conn2.id = 2;
     client.newConnection(1, conn1);
+    client.newConnection(2, conn2);
     var socket1 = client.getConnection();
     conn1.emit('end');
+    conn1.emit('close');
     client.returnConnection(socket1);
-    test.strictEqual(client.getConnection(), undefined);
+    test.equal(client.getConnection().id, 2);
+    test.equal(client.slotCount, 1);
     test.done();
 };  
 
 test['returnConnection() does not restore socket that emitted "error" event'] = function (test) {
-    test.expect(1);
+    test.expect(2);
     var client = new CallosumClient();
     var conn1 = new net.Socket();
     conn1.id = 1;
+    var conn2 = new net.Socket();
+    conn2.id = 2;
     client.newConnection(1, conn1);
+    client.newConnection(2, conn2);
     var socket1 = client.getConnection();
     conn1.emit('error');
+    conn1.emit('close');
     client.returnConnection(socket1);
-    test.strictEqual(client.getConnection(), undefined);
+    test.equal(client.getConnection().id, 2);
+    test.equal(client.slotCount, 1);
     test.done();
 };  
 
-
 test['returnConnection() does not restore socket that emitted "close" event'] = function (test) {
-    test.expect(1);
+    test.expect(2);
     var client = new CallosumClient();
     var conn1 = new net.Socket();
     conn1.id = 1;
+    var conn2 = new net.Socket();
+    conn2.id = 2;
     client.newConnection(1, conn1);
+    client.newConnection(2, conn2);
     var socket1 = client.getConnection();
     conn1.emit('close');
     client.returnConnection(socket1);
-    test.strictEqual(client.getConnection(), undefined);
+    test.equal(client.getConnection().id, 2);
+    test.equal(client.slotCount, 1);
     test.done();
 };  

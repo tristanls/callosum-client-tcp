@@ -88,11 +88,16 @@ CallosumClient.prototype.insertSocket = function insertSocket (slot, socket) {
     if (!socket._destroySocket) {
         // append watchdogs if not present
         var destroySocket = function destroySocket () {
-            socket._destroyed = true;
+            // only-once semantics by removal of the listeners
+            socket.removeListener('end', socket._destroySocket);
+            socket.removeListener('error', socket._destroySocket);
+            socket.removeListener('close', socket._destroySocket); 
             // decrement max slots because socket got destroyed for some reason
             // so we can't use it anymore
             if (self.slotCount > 0)
                 self.slotCount--;
+
+            socket._destroyed = true;
         };
         socket._destroySocket = destroySocket;
         socket.on('end', destroySocket);
