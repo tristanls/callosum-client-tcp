@@ -61,6 +61,7 @@ Creates a new instance of CallosumClient.
 
   * Return: _Socket object_
     * `_destroyed`: _Boolean_ _**CAUTION: reserved for internal use**_
+    * `_destroySocket`: _Function_ _**CAUTION: reserved for internal use**_
     * `_leased`: _Boolean_ _**CAUTION: reserved for internal use**_
     * `_slot`: _Integer_ _**CAUTION: reserved for internal use**_
 
@@ -86,6 +87,7 @@ New connection (from a rover) is available for the client to keep or discard.
 
   * `socket`: _Socket object_
     * `_destroyed`: _Boolean_ _**CAUTION: reserved for internal use**_
+    * `_destroySocket`: _Function_ _**CAUTION: reserved for internal use**_
     * `_leased`: _Boolean_ _**CAUTION: reserved for internal use**_
     * `_slot`: _Integer_ _**CAUTION: reserved for internal use**_
 
