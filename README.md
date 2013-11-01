@@ -51,8 +51,42 @@ Open available connections are maintained internally via two heap data structure
 
 ### new CallosumClient([options])
 
+  * `options`: _Object_ _(Default: {})_
+    * `MAX_SLOTS`: _Integer_ _(Default: 100)_ Number of connection slots to
+            maintain.
+
+Creates a new instance of CallosumClient.
+
 ### callosumClient.getConnection()
+
+  * Return: _Socket object_
+    * `_destroyed`: _Boolean_ _**CAUTION: reserved for internal use**_
+    * `_leased`: _Boolean_ _**CAUTION: reserved for internal use**_
+    * `_slot`: _Integer_ _**CAUTION: reserved for internal use**_
+
+Returns next available socket with lowest slot number. If no sockets are available, `undefined` is returned.
+
+### callosumClient.insertSocket(slot, socket)
+
+_**CAUTION: reserved for internal use**_
+
+  * `slot`: _Integer_ Slot number.
+  * `socket`: _Socket object_ Socket.
+
+Internal bookkeeping of the socket via a min heap and a max heap with event listeners for socket destruction.
 
 ### callosumClient.newConnection(slot, socket)
 
+  * `slot`: _Integer_ Slot number.
+  * `socket`: _Socket object_ Socket.
+
+New connection (from a rover) is available for the client to keep or discard.
+
 ### callosumClient.returnConnection(socket)
+
+  * `socket`: _Socket object_
+    * `_destroyed`: _Boolean_ _**CAUTION: reserved for internal use**_
+    * `_leased`: _Boolean_ _**CAUTION: reserved for internal use**_
+    * `_slot`: _Integer_ _**CAUTION: reserved for internal use**_
+
+When the user of the `socket` is finished with it, instead of closing it, this method allows the `socket` to be handed back to Callosum.
