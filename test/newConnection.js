@@ -63,3 +63,29 @@ test['newConnection() replaces the connection with highest slot number if MAX_SL
     test.strictEqual(client.getConnection(), undefined);
     test.done();
 };
+
+test['after new connection is added, slot count is decremented if connection '
+    + 'becomes unusable outside of the client'] = function (test) {
+
+    test.expect(3);
+    var client = new CallosumClient({MAX_SLOTS: 1});
+    var conn1 = new net.Socket();
+    conn1.id = 1;
+    client.newConnection(1, conn1);
+    var socket1 = client.getConnection();
+    var conn2 = new net.Socket();
+    conn2.id = 2;
+    var conn3 = new net.Socket();
+    conn3.id = 3;
+    // conn2 won't be accepted
+    client.newConnection(2, conn2);
+    test.strictEqual(client.getConnection(), undefined);
+    // crash conn1
+    conn1.emit('error');
+    // conn3 should now be accepted
+    client.newConnection(3, conn3);
+    test.equal(client.getConnection().id, 3);
+    // conn1 is destroyed
+    test.ok(conn1._destroyed);
+    test.done();
+};

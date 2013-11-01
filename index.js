@@ -87,7 +87,12 @@ CallosumClient.prototype.insertSocket = function insertSocket (slot, socket) {
     socket._slot = slot;
     var destroySocket = function destroySocket () {
         socket._destroyed = true;
+        // decrement max slots because socket got destroyed for some reason
+        // so we can't use it anymore
+        if (self.slotCount > 0)
+            self.slotCount--;
     };
+    socket._destroySocket = destroySocket;
     socket.on('end', destroySocket);
     socket.on('error', destroySocket);
     socket.on('close', destroySocket);
@@ -108,8 +113,9 @@ CallosumClient.prototype.newConnection = function newConnection (slot, socket) {
         return;
     }
     
-    // the new socket has a lower slot number than our highest slot
-    // so put the high socket to the deadpool
+    // we reached MAX_SLOTS, in this case compare the new connection with
+    // socket that has highest slot number
+
     var maxSocket = self.maxHeap.extractMax();
     // we get rid of destroyed sockets here
     while (maxSocket && maxSocket._destroyed) {
@@ -133,6 +139,9 @@ CallosumClient.prototype.newConnection = function newConnection (slot, socket) {
 
     // if the socket is not currently leased, destroy it right away
     if (!maxSocket._leased) {
+        maxSocket.removeListener('end', maxSocket._destroySocket);
+        maxSocket.removeListener('error', maxSocket._destroySocket);
+        maxSocket.removeListener('close', maxSocket._destroySocket);        
         maxSocket.destroy();
     } else {
         // otherwise, place it in the deadpool
@@ -155,6 +164,9 @@ CallosumClient.prototype.returnConnection = function returnConnection (socket) {
     var deadpoolIndex = self.deadpool.indexOf(socket);
     if (deadpoolIndex >= 0) {
         var deadSocket = self.deadpool[deadpoolIndex];
+        deadSocket.removeListener('end', deadSocket._destroySocket);
+        deadSocket.removeListener('error', deadSocket._destroySocket);
+        deadSocket.removeListener('close', deadSocket._destroySocket);
         deadSocket.destroy();
         self.deadpool.splice(deadpoolIndex, 1);
         return;
