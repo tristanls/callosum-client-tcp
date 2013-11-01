@@ -107,22 +107,22 @@ CallosumClient.prototype.newConnection = function newConnection (slot, socket) {
         self.insertSocket(slot, socket);
         return;
     }
-
-    // we have enough slots
-    // retrieve slot with highest slot number
-    var maxSocket = self.maxHeap.maximum();
-
-    // if our max socket slot is less or equal than the new one
-    // then reject the new connection
-    if (maxSocket && maxSocket._slot <= slot)
-        return socket.destroy();
     
     // the new socket has a lower slot number than our highest slot
     // so put the high socket to the deadpool
-    maxSocket = self.maxHeap.extractMax();
+    var maxSocket = self.maxHeap.extractMax();
     // we get rid of destroyed sockets here
     while (maxSocket && maxSocket._destroyed) {
         maxSocket = self.maxHeap.extractMax();
+    }
+
+    // if our max socket slot is less or equal than the new one
+    // then reject the new connection
+    if (maxSocket && maxSocket._slot <= slot) {
+        socket.destroy();
+        // put back our maxSocket
+        self.maxHeap.insert(maxSocket._slot, maxSocket);
+        return;
     }
 
     if (!maxSocket)
