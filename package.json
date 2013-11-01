@@ -1,6 +1,6 @@
 {
   "name": "callosum-client-tcp",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "TCP client for Callosum: a self-balancing distributed services protocol",
   "scripts": {
     "test": "node scripts/test.js"
